@@ -60,6 +60,8 @@ int openGPIO(int pin, bool in){
     int in_val_fd = open(valStr, O_RDWR);  
     ECHK(in_val_fd != -1);
     
+    std::cout << "Opened FD=" << in_val_fd << std::endl;
+    
     return in_val_fd;
 }
 
@@ -71,6 +73,7 @@ int writeGPIO(int fd, int val){
     } else {
         wlen = write(fd, "0", 2);
     }
+    std::cout << "wrote " << wlen << " size" << std::endl;
     ECHK(wlen == 2);
     return 0;
 }
