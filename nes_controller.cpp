@@ -89,60 +89,60 @@ int readGPIO(int fd){
     return atoi(readbuf);
 }
 
-int checkController(int latchPin, int pulsePin, int dataPin){
+int checkController(int latchFD, int pulseFD, int dataFD){
 
-  writeGPIO(latchPin, HIGH);
+  writeGPIO(latchFD, HIGH);
   usleep(12);
   
-  writeGPIO(latchPin, LOW);
+  writeGPIO(latchFD, LOW);
   usleep(6);
   
-  int a = readGPIO(dataPin);
+  int a = readGPIO(dataFD);
   
-  writeGPIO(pulsePin,HIGH);
+  writeGPIO(pulseFD,HIGH);
   usleep(6);
-  writeGPIO(pulsePin,LOW);
-  usleep(6);
-  
-  int b = readGPIO(dataPin);
-  
-  writeGPIO(pulsePin,HIGH);
-  usleep(6);
-  writeGPIO(pulsePin,LOW);
+  writeGPIO(pulseFD,LOW);
   usleep(6);
   
-  int sel = readGPIO(dataPin);
+  int b = readGPIO(dataFD);
   
-  writeGPIO(pulsePin,HIGH);
+  writeGPIO(pulseFD,HIGH);
   usleep(6);
-  writeGPIO(pulsePin,LOW);
+  writeGPIO(pulseFD,LOW);
   usleep(6);
   
-  int start = readGPIO(dataPin);
+  int sel = readGPIO(dataFD);
   
-  writeGPIO(pulsePin,HIGH);
+  writeGPIO(pulseFD,HIGH);
   usleep(6);
-  writeGPIO(pulsePin,LOW);
+  writeGPIO(pulseFD,LOW);
   usleep(6);
-  int up = readGPIO(dataPin);
   
-  writeGPIO(pulsePin,HIGH);
-  usleep(6);
-  writeGPIO(pulsePin,LOW);
-  usleep(6);
-  int down = readGPIO(dataPin);
+  int start = readGPIO(dataFD);
   
-  writeGPIO(pulsePin,HIGH);
+  writeGPIO(pulseFD,HIGH);
   usleep(6);
-  writeGPIO(pulsePin,LOW);
+  writeGPIO(pulseFD,LOW);
   usleep(6);
-  int left = readGPIO(dataPin);
+  int up = readGPIO(dataFD);
   
-  writeGPIO(pulsePin,HIGH);
+  writeGPIO(pulseFD,HIGH);
   usleep(6);
-  writeGPIO(pulsePin,LOW);
+  writeGPIO(pulseFD,LOW);
   usleep(6);
-  int right = readGPIO(dataPin);
+  int down = readGPIO(dataFD);
+  
+  writeGPIO(pulseFD,HIGH);
+  usleep(6);
+  writeGPIO(pulseFD,LOW);
+  usleep(6);
+  int left = readGPIO(dataFD);
+  
+  writeGPIO(pulseFD,HIGH);
+  usleep(6);
+  writeGPIO(pulseFD,LOW);
+  usleep(6);
+  int right = readGPIO(dataFD);
   
   std::cout << "a=" << a << std::endl;
   std::cout << "b=" << a << std::endl;
@@ -162,8 +162,12 @@ int main(int argc, char **argv){
     int pulsePin = 134;
     int dataPin = 136;
     
+    int latchFD = openGPIO(latchPin, false);
+    int pulseFD = openGPIO(pulsePin, false);
+    int dataFD = openGPIO(dataPin, true);
+    
     while(true){
-        checkController(latchPin, pulsePin, dataPin);
+        checkController(latchFD, pulseFD, dataFD);
         sleep(1);
     }
 }
