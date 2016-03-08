@@ -14,6 +14,23 @@ int LOW = 0;
 
 int MICRO=1e3;
 
+struct Buttons {
+   int a;
+   int b;
+   int sel;
+   int start;
+   int up;
+   int down;
+   int left;
+   int right;
+   
+   int code(){
+   	return  (a << 1) | (b << 2) | (sel << 3) |
+   		(start << 4) | (up << 5) | (down << 6) |
+   		(left << 7) | (right << 8);
+   }
+};
+
 #define WCHK(cond_expr) do { \
   if (!(cond_expr)) { \
     fprintf(stderr, "%s:%d, Warning, expected '%s' to be true (%s)\n", \
@@ -54,7 +71,7 @@ int openGPIO(int pin, bool in){
     int dir_fd = open(dirStr, O_RDWR);  
     ECHK(dir_fd != -1);
     wlen = write(dir_fd, (in ? "in": "out"), INOUT_STR_LEN);  
-    ECHK(wlen == (in ? 3 : 4));
+    ECHK(wlen == INOUT_STR_LEN);
     close(dir_fd);
 	
     int in_val_fd = open(valStr, O_RDWR);  
@@ -89,7 +106,14 @@ int readGPIO(int fd){
     return atoi(readbuf);
 }
 
-int checkController(int latchFD, int pulseFD, int dataFD){
+inline void wait(int pulseFD){
+    writeGPIO(pulseFD,HIGH);
+    usleep(6);
+    writeGPIO(pulseFD,LOW);
+    usleep(6);
+}
+
+int checkController(int latchFD, int pulseFD, int dataFD, Buttons *bt){
 
   writeGPIO(latchFD, HIGH);
   usleep(12);
@@ -97,61 +121,32 @@ int checkController(int latchFD, int pulseFD, int dataFD){
   writeGPIO(latchFD, LOW);
   usleep(6);
   
-  int a = readGPIO(dataFD);
+  bt->a 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->b 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->sel 	= readGPIO(dataFD);
+  wait(pulseFD); 
+  bt->start 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->up 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->down 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->left 	= readGPIO(dataFD);
+  wait(pulseFD);
+  bt->right 	= readGPIO(dataFD);
   
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  
-  int b = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  
-  int sel = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  
-  int start = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  int up = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  int down = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  int left = readGPIO(dataFD);
-  
-  writeGPIO(pulseFD,HIGH);
-  usleep(6);
-  writeGPIO(pulseFD,LOW);
-  usleep(6);
-  int right = readGPIO(dataFD);
-  
+  /*
   std::cout << "a=" << a << std::endl;
-  std::cout << "b=" << a << std::endl;
-  std::cout << "sel=" << a << std::endl;
-  std::cout << "start=" << a << std::endl;
-  std::cout << "up=" << a << std::endl;
-  std::cout << "down=" << a << std::endl;
-  std::cout << "left=" << a << std::endl;
-  std::cout << "right=" << a << std::endl;
+  std::cout << "b=" << b << std::endl;
+  std::cout << "sel=" << sel << std::endl;
+  std::cout << "start=" << start << std::endl;
+  std::cout << "up=" << up << std::endl;
+  std::cout << "down=" << down << std::endl;
+  std::cout << "left=" << left << std::endl;
+  std::cout << "right=" << right << std::endl;
+  */
   
   return 0;
   
@@ -167,7 +162,9 @@ int main(int argc, char **argv){
     int dataFD = openGPIO(dataPin, true);
     
     while(true){
-        checkController(latchFD, pulseFD, dataFD);
+        Buttons bt = {};
+        checkController(latchFD, pulseFD, dataFD, &bt);
+        std::cout << bt.code() << std::endl;
         sleep(1);
     }
 }
